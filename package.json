@@ -1,0 +1,10 @@
+{
+  "name": "bubble-pendant",
+  "version": "0.3.0",
+  "description": "A tiny speech-bubble pendant next to chat avatars (QQ-style). One dependency-free JS file: Web Component + preset controller, with special-date and night presets, and one-off notes written by the AI.",
+  "main": "bubble-pendant.js",
+  "files": ["bubble-pendant.js", "README.md", "LICENSE", "NOTICE.md"],
+  "scripts": { "test": "node --test test/values.test.js" },
+  "keywords": ["chat", "avatar", "speech-bubble", "web-component", "ai-companion"],
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

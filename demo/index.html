@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bubble-pendant demo</title>
+<style>
+  :root { color-scheme:dark; --bg:#121117; --panel:#1b1a22; --line:#2c2a36; --text:#e9e6f2; --muted:#9a96a8; --accent:#b7a6e8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.6 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  main { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:24px; max-width:1080px; margin:0 auto; padding:24px 16px; }
+  h1 { font-size:18px; margin:0 0 4px; } h1 small { color:var(--muted); font-weight:400; font-size:13px; }
+  h2 { font-size:14px; margin:20px 0 8px; color:var(--muted); font-weight:500; }
+  .chat { border:1px solid var(--line); border-radius:16px; padding:52px 16px 28px; min-height:520px; overflow:hidden; }
+  .row { display:flex; gap:8px; align-items:flex-start; margin:0 0 26px; }
+  .row.me { flex-direction:row-reverse; }
+  .avatar { flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-size:12px; overflow:hidden; }
+  .row.ai .avatar { background:#3a3550; } .row.me .avatar { background:#4f4466; }
+  .msg { max-width:75%; padding:8px 13px; border-radius:16px; background:#24222e; }
+  .row.me .msg { background:#3b3450; }
+  .panel { border:1px solid var(--line); border-radius:16px; padding:16px; background:var(--panel); align-self:start; }
+  label.line { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:36px; }
+  input[type=range] { width:150px; accent-color:var(--accent); }
+  input[type=text], textarea { width:100%; min-width:0; background:#121117; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 8px; font:inherit; }
+  textarea { min-height:96px; font:12px/1.5 ui-monospace,monospace; }
+  button { background:#2a2735; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 12px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  .presets { list-style:none; margin:0; padding:0; }
+  .presets li { display:grid; grid-template-columns:auto 1fr 1fr auto; gap:6px; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  .presets li .more { grid-column:2/-1; display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); }
+  .presets li .more input[type=text] { width:7em; }
+  input[type=color] { width:40px; height:26px; padding:0; border:1px solid var(--line); background:none; }
+  .presets li.on { outline:1px dashed #6a5f8f; outline-offset:2px; border-radius:6px; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .hint { color:var(--muted); font-size:12px; margin:4px 0 0; }
+  /* 换皮示例：只改 CSS 变量 */
+  body.skin-night bubble-pendant { --bp-bg:#2b2440; --bp-ink:#efe9ff; --bp-line:#a99ad8; --bp-shadow-alpha:.6; }
+  @media (max-width:760px) { main { grid-template-columns:1fr; } .chat { min-height:0; } }
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <h1>bubble-pendant <small>头像旁的小对话气泡 · speech-bubble avatar pendant</small></h1>
+    <p class="hint">每次点「重新进入」相当于重新打开聊天页：气泡「啵」地弹出来，从启用的组合里抽一组，这次打开期间不变；点一下气泡会晃一下。Each “Re-enter” simulates opening the chat again: the bubbles pop in, one preset is picked and kept. Tap a bubble to make it wiggle.</p>
+    <div class="chat" id="chat" data-bp-boundary></div>
+  </section>
+  <aside class="panel">
+    <div class="actions" style="margin-top:0"><button id="visit">重新进入 / Re-enter</button><button id="skin">换皮 / Toggle skin</button></div>
+    <h2>外观 / Look</h2>
+    <label class="line">显示 / Enabled <input type="checkbox" id="enabled"></label>
+    <label class="line">气泡大小 / Bubble size <input type="range" id="scale" min="0.6" max="1.6" step="0.05"></label>
+    <label class="line">文字大小 / Text size <input type="range" id="textScale" min="0.6" max="1.6" step="0.05"></label>
+    <label class="line">浮动 / Float <input type="checkbox" id="float"></label>
+    <label class="line">幅度 / Amplitude <input type="range" id="amplitude" min="0" max="6" step="0.5"></label>
+    <label class="line">周期 / Period (s) <input type="range" id="period" min="2" max="12" step="0.5"></label>
+    <label class="line">深夜从 / Night from <input type="range" id="nightFrom" min="0" max="23" step="1"><output id="nightFromOut"></output></label>
+    <label class="line">到（不含）/ until <input type="range" id="nightTo" min="0" max="23" step="1"><output id="nightToOut"></output></label>
+    <h2>气泡样式 / Bubble style</h2>
+    <label class="line">宽 / Width <input type="range" data-look="w" min="0.3" max="1.6" step="0.01"></label>
+    <label class="line">高 / Height <input type="range" data-look="h" min="0.3" max="1.6" step="0.01"></label>
+    <label class="line">留白 / Padding <input type="range" data-look="pad" min="0" max="0.6" step="0.01"></label>
+    <label class="line">尾巴长 / Tail length <input type="range" data-look="tail" min="0" max="1" step="0.01"></label>
+    <label class="line">尾巴宽 / Tail width <input type="range" data-look="tailW" min="0" max="1" step="0.01"></label>
+    <label class="line">底色 · 字色 · 描边 / Colors <span><input type="color" data-look="bg"> <input type="color" data-look="ink"> <input type="color" data-look="line"></span></label>
+    <h2>组合预设 / Presets（你 · TA）</h2>
+    <p class="hint">特殊日子（月-日）的组只在每年那天出现；深夜的组在深夜时段优先、白天不出现。A dated preset shows only on that day each year; night presets are preferred at night and skipped in the daytime.</p>
+    <ul class="presets" id="presets"></ul>
+    <div class="actions"><button id="add">新增一组 / Add</button><button id="reset">恢复默认 / Reset</button></div>
+    <h2>AI 留言 / Note from the AI</h2>
+    <p class="hint">模拟一条 AI 回复：里面的 &lt;pendant/&gt; 标签会被收下、从正文里去掉，下次「重新进入」时显示一次（每边最多 4 个字）。Paste a reply; its hidden tag becomes the bubbles for the next visit, once.</p>
+    <textarea id="reply" spellcheck="false" style="min-height:60px">早点睡。<pendant user="困" assistant="快去睡"/></textarea>
+    <div class="actions"><button id="take">收到回复 / Take reply</button></div>
+    <h2>导入导出 / Import · Export (JSON)</h2>
+    <textarea id="json" spellcheck="false"></textarea>
+    <div class="actions"><button id="export">导出 / Export</button><button id="import">导入替换 / Import</button><button id="merge">导入追加 / Merge</button></div>
+    <p class="hint" id="status"></p>
+  </aside>
+</main>
+<script src="../bubble-pendant.js"></script>
+<script>
+  const BP = window.BubblePendant;
+  const pendants = BP.use(BP.create({ key: 'bubble-pendant-demo' }));
+  const lines = [
+    ['ai', '今天过得怎么样？'], ['me', '还行，就是有点困。'], ['ai', '那早点休息，明天再说。'],
+    ['me', '好吧，听你的。这条长一点，看看气泡会不会挡住旁边的东西。'], ['ai', '不会的，它只浮在头像旁边，不占位置，也不拦点击。'],
+  ];
+  const chat = document.getElementById('chat');
+  for (const [who, text] of lines) {
+    const row = document.createElement('div'); row.className = `row ${who}`;
+    const avatar = document.createElement('div'); avatar.className = 'avatar'; avatar.textContent = who === 'me' ? '我' : 'TA';
+    avatar.title = '点头像也照常可点 / avatar stays clickable'; avatar.onclick = () => status(`点到了${who === 'me' ? '我' : 'TA'}的头像`);
+    const msg = document.createElement('div'); msg.className = 'msg'; msg.textContent = text;
+    row.append(avatar, msg); chat.append(row);
+    BP.attach(avatar, who === 'me' ? 'user' : 'assistant');
+  }
+  const $ = (id) => document.getElementById(id);
+  const status = (text) => { $('status').textContent = text; };
+  function renderPanel() {
+    const c = pendants.config;
+    $('enabled').checked = c.enabled; $('float').checked = c.float;
+    for (const k of ['scale', 'textScale', 'amplitude', 'period', 'nightFrom', 'nightTo']) $(k).value = c[k];
+    $('nightFromOut').value = c.nightFrom + ':00'; $('nightToOut').value = c.nightTo + ':00';
+    document.querySelectorAll('[data-look]').forEach((input) => { input.value = c.look[input.dataset.look]; });
+    const current = pendants.current?.id;
+    const list = $('presets');
+    if (list.contains(document.activeElement)) { // 正在打字时只更新高亮
+      list.querySelectorAll('li').forEach((li) => li.classList.toggle('on', li.dataset.id === current)); return;
+    }
+    list.innerHTML = '';
+    for (const p of c.presets) {
+      const li = document.createElement('li'); li.dataset.id = p.id; li.classList.toggle('on', p.id === current);
+      li.innerHTML = `<input type="checkbox" title="启用 / enabled"><input type="text" placeholder="汪。" maxlength="16"><input type="text" placeholder="乖。" maxlength="16"><button title="删除 / delete">×</button>
+        <span class="more">日子 / date <input type="text" placeholder="05-20" maxlength="8"> <label><input type="checkbox"> 深夜 / night</label></span>`;
+      const [on, user, ai, del, more] = li.children;
+      const [date, nightLabel] = more.children, night = nightLabel.firstElementChild;
+      on.checked = p.enabled; user.value = p.user; ai.value = p.assistant; date.value = p.date || ''; night.checked = !!p.night;
+      date.oninput = () => { const ok = !date.value.trim() || BP.cleanDate(date.value); date.style.borderColor = ok ? '' : '#c0607a'; if (ok) pendants.updatePreset(p.id, { date: date.value }); };
+      night.onchange = () => pendants.updatePreset(p.id, { night: night.checked });
+      on.onchange = () => pendants.setPresetEnabled(p.id, on.checked);
+      user.oninput = () => pendants.updatePreset(p.id, { user: user.value });
+      ai.oninput = () => pendants.updatePreset(p.id, { assistant: ai.value });
+      del.onclick = () => pendants.removePreset(p.id);
+      list.append(li);
+    }
+  }
+  pendants.subscribe(renderPanel);
+  pendants.ready.then(() => { pendants.startVisit(); renderPanel(); });
+  // 头像大小写在 CSS 变量里，气泡按它算 / pendants size themselves from --bp-avatar-size
+  $('visit').onclick = () => { const p = pendants.startVisit(); status(p ? `这次抽到：${p.user} / ${p.assistant}` : '没有启用的组合'); };
+  $('skin').onclick = () => document.body.classList.toggle('skin-night');
+  $('enabled').onchange = (e) => pendants.set({ enabled: e.target.checked });
+  $('float').onchange = (e) => pendants.set({ float: e.target.checked });
+  for (const k of ['scale', 'textScale', 'amplitude', 'period', 'nightFrom', 'nightTo']) $(k).oninput = (e) => pendants.set({ [k]: Number(e.target.value) });
+  document.querySelectorAll('[data-look]').forEach((input) => { input.oninput = () => pendants.set({ look: { [input.dataset.look]: input.type === 'color' ? input.value : Number(input.value) } }); });
+  $('add').onclick = () => pendants.addPreset().catch((e) => status(e.message));
+  $('reset').onclick = () => pendants.importJSON(BP.DEFAULTS).then(() => pendants.startVisit());
+  $('take').onclick = async () => {
+    const shown = await pendants.takeReply($('reply').value);
+    const note = pendants.config.note;
+    status(note ? `显示的正文：${shown}　下次打开：${note.user || '随机'} / ${note.assistant || '随机'}` : `显示的正文：${shown}（没有标签）`);
+  };
+  $('export').onclick = () => { $('json').value = pendants.exportJSON(); status('已导出到上面的文本框。'); };
+  const importIt = (merge) => pendants.importJSON($('json').value, { merge }).then(() => status(merge ? '已追加。' : '已替换。')).catch((e) => status('JSON 有误：' + e.message));
+  $('import').onclick = () => importIt(false); $('merge').onclick = () => importIt(true);
+</script>
+</body>
+</html>
