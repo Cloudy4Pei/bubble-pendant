@@ -30,7 +30,7 @@
 
 ### 试一下
 
-直接用浏览器打开 `demo/index.html`。可以改字、设特殊日子和深夜组、调大小和样式、换皮、导入导出；点「重新进入」模拟重新打开聊天页。
+把仓库下载或克隆到本地，用浏览器直接打开 `demo/index.html`（双击，或拖进 Chrome / Edge）。在 GitHub 网页上或编辑器的预览里打开不会运行脚本，只能看到空框。可以改字、设特殊日子和深夜组、调大小和样式、换皮、导入导出；点「重新进入」模拟重新打开聊天页。
 
 ### 接入
 
@@ -201,7 +201,7 @@ Screenshots are at the top of this page (taken from `demo/index.html`).
 
 ### Try it
 
-Open `demo/index.html` in a browser.
+Download or clone the repo and open `demo/index.html` directly in a browser. GitHub’s file view and editor previews do not run the script, so you would only see an empty box.
 
 ### Use it
 

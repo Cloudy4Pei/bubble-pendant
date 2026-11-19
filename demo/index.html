@@ -43,7 +43,7 @@
   <section>
     <h1>bubble-pendant <small>头像旁的小对话气泡 · speech-bubble avatar pendant</small></h1>
     <p class="hint">每次点「重新进入」相当于重新打开聊天页：气泡「啵」地弹出来，从启用的组合里抽一组，这次打开期间不变；点一下气泡会晃一下。Each “Re-enter” simulates opening the chat again: the bubbles pop in, one preset is picked and kept. Tap a bubble to make it wiggle.</p>
-    <div class="chat" id="chat" data-bp-boundary></div>
+    <div class="chat" id="chat" data-bp-boundary><p class="hint" id="no-script">这里是空的？说明脚本没有运行：请在浏览器里直接打开这个文件（双击，或拖进 Chrome / Edge），不要用编辑器或网页上的预览。也可以在仓库目录运行 <code>npx serve</code> 后打开 <code>/demo/</code>。<br>Empty? The script did not run: open this file directly in a browser, not in an editor or web preview, or run <code>npx serve</code> in the repo and open <code>/demo/</code>.</p></div>
   </section>
   <aside class="panel">
     <div class="actions" style="margin-top:0"><button id="visit">重新进入 / Re-enter</button><button id="skin">换皮 / Toggle skin</button></div>
@@ -80,6 +80,7 @@
 <script src="../bubble-pendant.js"></script>
 <script>
   const BP = window.BubblePendant;
+  document.getElementById('no-script')?.remove();
   const pendants = BP.use(BP.create({ key: 'bubble-pendant-demo' }));
   const lines = [
     ['ai', '今天过得怎么样？'], ['me', '还行，就是有点困。'], ['ai', '那早点休息，明天再说。'],
